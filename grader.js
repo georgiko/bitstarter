@@ -26,6 +26,14 @@ var program = require('commander');
 var cheerio = require('cheerio');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
+var sys = require('util'),
+    rest = require('./node_modules/restler');
+
+var checkURL = function(url){
+rest.get(url).on('complete', function(data, response) {
+    return response.headers;
+});
+};
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
@@ -65,6 +73,7 @@ if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+                .option('-u, --url <url>', 'URL to the html site', clone(checkURL), HTMLFILE_DEFAULT)
         .parse(process.argv);
     var checkJson = checkHtmlFile(program.file, program.checks);
     var outJson = JSON.stringify(checkJson, null, 4);
@@ -72,3 +81,4 @@ if(require.main == module) {
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
+
